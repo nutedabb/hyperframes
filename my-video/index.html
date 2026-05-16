@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1080, height=1920">
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+      background: #000;
+      font-family: 'Arial Black', Impact, sans-serif;
+    }
+    #stage {
+      position: relative;
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+    }
+    .clip {
+      position: absolute;
+      text-shadow: 0 0 20px rgba(0,0,0,0.9);
+      will-change: transform, opacity;
+      /* keep all text within 100px from edges (vertical short safe zone) */
+      left: 100px;
+      right: 100px;
+    }
+    /* Common text styles */
+    .caption {
+      color: #fff;
+      font-size: 80px;
+      text-align: center;
+      bottom: 200px;
+    }
+    .hook-caption {
+      font-size: 80px;
+      text-align: center;
+      bottom: 600px; /* Centered-ish vertically */
+    }
+
+    .slam-rank {
+      color: #fff;
+      font-size: 120px;
+      top: 100px;
+      left: 100px;
+      right: auto;
+    }
+    .slam-bar {
+      height: 6px;
+      width: 880px; /* 1080 - 200 */
+      background: #fff; /* to be overridden */
+      top: 240px;
+      left: 100px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.9);
+    }
+    .slam-label {
+      color: #fff;
+      font-size: 36px;
+      top: 190px;
+      left: 280px; /* after slam rank moves to top left */
+      right: 100px;
+      white-space: nowrap;
+    }
+    .cost-counter {
+      font-size: 80px;
+      text-align: center;
+      bottom: 400px;
+    }
+    .cost-subtitle {
+      color: #fff;
+      font-size: 34px;
+      font-style: italic;
+      text-align: center;
+      bottom: 340px;
+    }
+
+    .rank-5-color { color: #00ff88; } /* green */
+    .rank-4-color { color: #FFD700; } /* gold */
+    .rank-3-color { color: #00cfff; } /* cyan */
+    .rank-2-color { color: #ff6b00; } /* orange */
+    .rank-1-color { color: #FFD700; } /* gold */
+
+    .rank-5-bar { background: #ff0000; } /* red accent bar */
+    .rank-4-bar { background: #1a1a2e; } /* dark navy */
+    .rank-3-bar { background: #0d1b2a; } /* deep space blue */
+    .rank-2-bar { background: #1c1c1c; } /* dark gray/black */
+
+    /* #1 Specific */
+    .rank-1-slam {
+      font-size: 180px;
+      text-align: center;
+      top: 500px;
+      left: 100px;
+      right: 100px;
+      width: 880px;
+    }
+    .screen-flash {
+      background: #fff;
+      width: 1080px;
+      height: 1920px;
+      left: 0;
+      right: 0;
+      top: 0;
+      opacity: 0;
+      z-index: 999;
+    }
+    .apollo-label {
+      font-family: serif; /* "elegant gold serif-style text" */
+      font-weight: normal; /* To counter Arial Black */
+      color: #FFD700;
+      font-size: 70px;
+      text-align: center;
+      top: 750px;
+    }
+    .apollo-counter {
+      color: #FFD700;
+      font-size: 100px;
+      text-align: center;
+      top: 850px;
+    }
+    .apollo-subtitle {
+      color: #fff;
+      font-size: 38px;
+      font-style: italic;
+      text-align: center;
+      top: 1000px;
+    }
+
+    /* Particles */
+    .particles-container {
+      position: absolute;
+      top: 0; left: 0; width: 1080px; height: 1920px;
+      pointer-events: none;
+      z-index: 100;
+    }
+    .particle {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: #FFD700;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700;
+      opacity: 0;
+      animation: floatUp 5s linear infinite;
+    }
+
+    @keyframes floatUp {
+      0% { transform: translateY(100px); opacity: 0; }
+      20% { opacity: 0.8; }
+      80% { opacity: 0.8; }
+      100% { transform: translateY(-200px); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div id="stage" data-composition-id="my-video" data-start="0" data-width="1080" data-height="1920">
+    <video
+      id="bg-video"
+      data-start="0"
+      data-duration="96"
+      data-track-index="0"
+      src="Top5.mp4"
+      muted
+      playsinline
+      style="width: 1080px; height: 1920px; object-fit: cover;"
+    ></video>
+
+    <!-- Hook -->
+    <div id="hook-black" class="clip" data-start="0" data-duration="1" data-track-index="1" style="background:#000; left:0; right:0; width:1080px; height:1920px; z-index: 998;"></div>
+
+    <div id="hook-text" class="clip hook-caption" data-start="3" data-duration="8" data-track-index="2" style="text-shadow: 0 0 30px #fff, 0 0 10px #fff;">
+      These projects cost more than most countries' GDP…
+    </div>
+
+    <!-- #5 Entry -->
+    <div id="rank-5-group" class="clip" data-start="11" data-duration="13" data-track-index="3" style="left:0; right:0; width:1080px; height:1920px;">
+      <div id="rank-5-num" style="position: absolute;" class="slam-rank">#5</div>
+      <div id="rank-5-bar" style="position: absolute;" class="slam-bar rank-5-bar"></div>
+      <div id="rank-5-label" style="position: absolute;" class="slam-label">South-to-North Water Diversion · China</div>
+
+      <div id="rank-5-counter" style="position: absolute;" class="cost-counter rank-5-color">$0 BILLION</div>
+      <div id="rank-5-subtitle" style="position: absolute;" class="cost-subtitle">Longest water transfer in history</div>
+    </div>
+
+    <!-- #4 Entry -->
+    <div id="rank-4-group" class="clip" data-start="25" data-duration="16" data-track-index="4" style="left:0; right:0; width:1080px; height:1920px;">
+      <div id="rank-4-num" style="position: absolute;" class="slam-rank rank-4-color">#4</div>
+      <div id="rank-4-bar" style="position: absolute;" class="slam-bar rank-4-bar"></div>
+      <div id="rank-4-label" style="position: absolute;" class="slam-label">NEOM / THE LINE · Saudi Arabia</div>
+
+      <div id="rank-4-counter" style="position: absolute;" class="cost-counter rank-4-color">$0 BILLION</div>
+      <div id="rank-4-subtitle" style="position: absolute;" class="cost-subtitle">A city with zero roads or cars</div>
+    </div>
+
+    <!-- #3 Entry -->
+    <div id="rank-3-group" class="clip" data-start="42" data-duration="14" data-track-index="5" style="left:0; right:0; width:1080px; height:1920px;">
+      <div id="rank-3-num" style="position: absolute;" class="slam-rank">#3</div>
+      <div id="rank-3-bar" style="position: absolute;" class="slam-bar rank-3-bar"></div>
+      <div id="rank-3-label" style="position: absolute;" class="slam-label">International Space Station</div>
+
+      <div id="rank-3-counter" style="position: absolute;" class="cost-counter rank-3-color">$0 BILLION</div>
+      <div id="rank-3-subtitle" style="position: absolute;" class="cost-subtitle">Built by 15 nations · In actual space</div>
+    </div>
+
+    <!-- #2 Entry -->
+    <div id="rank-2-group" class="clip" data-start="57" data-duration="15" data-track-index="6" style="left:0; right:0; width:1080px; height:1920px;">
+      <div id="rank-2-num" style="position: absolute; font-size: 140px; top: 80px;" class="slam-rank rank-2-color">#2</div>
+      <div id="rank-2-bar" style="position: absolute; top: 250px;" class="slam-bar rank-2-bar"></div>
+      <div id="rank-2-label" style="position: absolute; top: 200px;" class="slam-label">US Interstate Highway System</div>
+
+      <div id="rank-2-counter" style="position: absolute;" class="cost-counter rank-2-color">$0 BILLION</div>
+      <div id="rank-2-subtitle" style="position: absolute;" class="cost-subtitle">48,000 miles of road</div>
+    </div>
+
+    <!-- #1 Entry -->
+    <div id="rank-1-flash" class="clip screen-flash" data-start="72" data-duration="0.1" data-track-index="7"></div>
+    <div id="rank-1-slam" class="clip rank-1-slam rank-1-color" data-start="72" data-duration="3" data-track-index="8">🏆 #1</div>
+
+    <div id="rank-1-overlays" class="clip" data-start="75" data-duration="21" data-track-index="9" style="left:0; right:0; width:1080px; height:1920px;">
+      <div id="rank-1-apollo" style="position: absolute;" class="apollo-label">NASA Apollo Program · USA</div>
+      <div id="rank-1-counter" style="position: absolute;" class="apollo-counter">$0 BILLION</div>
+      <div id="rank-1-subtitle" style="position: absolute;" class="apollo-subtitle">First humans on the Moon</div>
+
+      <!-- Particles -->
+      <div id="rank-1-particles" class="particles-container">
+        <!-- 10 particles with random offsets in animation -->
+        <div class="particle" style="left: 15%; top: 60%; animation-delay: 0s;"></div>
+        <div class="particle" style="left: 30%; top: 70%; animation-delay: 1s;"></div>
+        <div class="particle" style="left: 50%; top: 55%; animation-delay: 0.5s;"></div>
+        <div class="particle" style="left: 70%; top: 65%; animation-delay: 1.5s;"></div>
+        <div class="particle" style="left: 85%; top: 75%; animation-delay: 0.2s;"></div>
+        <div class="particle" style="left: 20%; top: 80%; animation-delay: 2s;"></div>
+        <div class="particle" style="left: 40%; top: 85%; animation-delay: 1.2s;"></div>
+        <div class="particle" style="left: 60%; top: 70%; animation-delay: 0.8s;"></div>
+        <div class="particle" style="left: 75%; top: 80%; animation-delay: 2.5s;"></div>
+        <div class="particle" style="left: 90%; top: 60%; animation-delay: 1.8s;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.__timelines = window.__timelines || {};
+    const tl = gsap.timeline({ paused: true });
+
+    // Polyfill for CLI inspector which might access timeline before it's fully populated
+    if (typeof tl.totalDuration !== "function") {
+       tl.totalDuration = function() { return 96; }
+    }
+    if (typeof tl.duration !== "function") {
+       tl.duration = function() { return 96; }
+    }
+
+    // Counter helper function
+    function updateCounter(elementId, valObj) {
+      document.getElementById(elementId).innerText = "$" + Math.floor(valObj.val) + " BILLION";
+    }
+    function updateCounterPlus(elementId, valObj) {
+      document.getElementById(elementId).innerText = "$" + Math.floor(valObj.val) + "+ BILLION";
+    }
+
+    // 0:00 - 0:01
+    tl.fromTo("#hook-black", { opacity: 1 }, { opacity: 0, duration: 1, ease: "none" }, 0);
+
+    // 0:03 - 0:11 (Hook text)
+    tl.fromTo("#hook-text", { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 1, ease: "power2.out" }, 3);
+    tl.fromTo("#hook-text", { opacity: 1 }, { opacity: 0, duration: 1, ease: "power2.inOut" }, 10);
+    tl.set("#hook-text", { opacity: 0 }, 11.00);
+
+    // #5 Entry
+    // 0:11 (11s)
+    tl.fromTo("#rank-5-num", { x: -800, fontSize: "120px", left: "480px", y: 400 }, { x: 0, duration: 0.5, ease: "elastic.out(1, 0.5)" }, 11);
+    tl.fromTo("#rank-5-num", { fontSize: "120px", left: "480px", y: 400 }, { fontSize: "60px", left: "100px", y: 0, duration: 0.5, ease: "power2.inOut" }, 11.5);
+    tl.fromTo("#rank-5-bar", { x: -1080 }, { x: 0, duration: 0.5, ease: "power2.out" }, 11.5);
+    tl.fromTo("#rank-5-label", { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: 0.5, ease: "power2.out" }, 11.5);
+
+    // 0:13 - 0:24 (13s - 24s)
+    let val5 = { val: 0 };
+    tl.fromTo("#rank-5-counter", { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.5 }, 13);
+    tl.to(val5, { val: 62, duration: 2, ease: "none", onUpdate: () => updateCounter("rank-5-counter", val5) }, 13);
+
+    // 0:16 (16s)
+    tl.fromTo("#rank-5-subtitle", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 }, 16);
+
+    // 0:24 (24s) Slam out
+    tl.fromTo("#rank-5-group", { x: 0 }, { x: 1080, duration: 0.5, ease: "power3.in" }, 23.5); // whoosh out at 23.5, completely gone by 24
+
+    // #4 Entry
+    // 0:25 (25s)
+    tl.fromTo("#rank-4-num", { x: -800, fontSize: "120px", left: "480px", y: 400 }, { x: 0, duration: 0.5, ease: "elastic.out(1, 0.5)" }, 25);
+    tl.fromTo("#rank-4-num", { fontSize: "120px", left: "480px", y: 400 }, { fontSize: "60px", left: "100px", y: 0, duration: 0.5, ease: "power2.inOut" }, 25.5);
+    tl.fromTo("#rank-4-bar", { x: -1080 }, { x: 0, duration: 0.5, ease: "power2.out" }, 25.5);
+    tl.fromTo("#rank-4-label", { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: 0.5, ease: "power2.out" }, 25.5);
+
+    // 0:27 - 0:41 (27s - 41s)
+    let val4 = { val: 0 };
+    tl.fromTo("#rank-4-counter", { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.5 }, 27);
+    tl.to(val4, { val: 500, duration: 2.5, ease: "none", onUpdate: () => updateCounter("rank-4-counter", val4) }, 27);
+
+    // 0:30 (30s)
+    tl.fromTo("#rank-4-subtitle", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 }, 30);
+
+    // 0:41 (41s) Slam out
+    tl.fromTo("#rank-4-group", { x: 0 }, { x: 1080, duration: 0.5, ease: "power3.in" }, 40.5);
+
+    // #3 Entry
+    // 0:42 (42s)
+    tl.fromTo("#rank-3-num", { x: -800, fontSize: "120px", left: "480px", y: 400 }, { x: 0, duration: 0.5, ease: "elastic.out(1, 0.5)" }, 42);
+    tl.fromTo("#rank-3-num", { fontSize: "120px", left: "480px", y: 400 }, { fontSize: "60px", left: "100px", y: 0, duration: 0.5, ease: "power2.inOut" }, 42.5);
+    tl.fromTo("#rank-3-bar", { x: -1080 }, { x: 0, duration: 0.5, ease: "power2.out" }, 42.5);
+    tl.fromTo("#rank-3-label", { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: 0.5, ease: "power2.out" }, 42.5);
+
+    // 0:44 - 0:56 (44s - 56s)
+    let val3 = { val: 0 };
+    tl.fromTo("#rank-3-counter", { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.5 }, 44);
+    tl.to(val3, { val: 150, duration: 2, ease: "none", onUpdate: () => updateCounter("rank-3-counter", val3) }, 44);
+
+    // 0:47 (47s)
+    tl.fromTo("#rank-3-subtitle", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 }, 47);
+
+    // 0:56 (56s) Slam out
+    tl.fromTo("#rank-3-group", { x: 0 }, { x: 1080, duration: 0.5, ease: "power3.in" }, 55.5);
+
+    // #2 Entry
+    // 0:57 (57s)
+    tl.fromTo("#rank-2-num", { x: -800, fontSize: "140px", left: "470px", y: 400 }, { x: 0, duration: 0.5, ease: "elastic.out(1, 0.5)" }, 57);
+    tl.fromTo("#rank-2-num", { fontSize: "140px", left: "470px", y: 400 }, { fontSize: "70px", left: "100px", y: 0, duration: 0.5, ease: "power2.inOut" }, 57.5);
+    tl.fromTo("#rank-2-bar", { x: -1080 }, { x: 0, duration: 0.5, ease: "power2.out" }, 57.5);
+    tl.fromTo("#rank-2-label", { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: 0.5, ease: "power2.out" }, 57.5);
+
+    // 0:59 - 1:12 (59s - 72s)
+    let val2 = { val: 0 };
+    tl.fromTo("#rank-2-counter", { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.5 }, 59);
+    tl.to(val2, { val: 500, duration: 2.5, ease: "none", onUpdate: () => updateCounterPlus("rank-2-counter", val2) }, 59);
+
+    // 1:02 (62s)
+    tl.fromTo("#rank-2-subtitle", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 }, 62);
+
+    // 1:12 (72s) Slam out
+    tl.fromTo("#rank-2-group", { x: 0 }, { x: 1080, duration: 0.5, ease: "power3.in" }, 71.5);
+
+    // #1 Entry
+    // 1:12 (72s) MASSIVE IMPACT
+    // 3 frames ~ 0.1s
+    tl.fromTo("#rank-1-flash", { opacity: 1 }, { opacity: 0, duration: 0.1, ease: "none" }, 72);
+    tl.fromTo("#rank-1-slam", { y: -800, scale: 2 }, { y: 0, scale: 1, duration: 1, ease: "elastic.out(1, 0.3)" }, 72);
+    tl.fromTo("#rank-1-slam", { opacity: 1 }, { opacity: 0, duration: 0.5, ease: "power2.in" }, 74.5); // Fades out before next scene starts
+    tl.set("#rank-1-slam", { opacity: 0 }, 75.00);
+
+    // 3 seconds pause - silence... (72 to 75)
+
+    // 1:15 - 1:36 (75s - 96s)
+    // 1:15 (75s)
+    tl.fromTo("#rank-1-apollo", { opacity: 0 }, { opacity: 1, duration: 1.2, ease: "power2.inOut" }, 75);
+
+    // 1:18 (78s)
+    let val1 = { val: 0 };
+    tl.fromTo("#rank-1-counter", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 78);
+    tl.to(val1, { val: 280, duration: 2, ease: "none", onUpdate: () => updateCounter("rank-1-counter", val1) }, 78);
+
+    // 1:20 (80s)
+    tl.fromTo("#rank-1-subtitle", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 1, ease: "power2.out" }, 80);
+
+    // 1:25 (85s) Particles - handled via CSS animation, just fade in container
+    tl.fromTo("#rank-1-particles", { opacity: 0 }, { opacity: 1, duration: 2, ease: "power2.inOut" }, 85);
+
+    // 1:34 (94s) Fade out everything gracefully
+    tl.fromTo("#rank-1-overlays", { opacity: 1 }, { opacity: 0, duration: 1, ease: "power2.inOut" }, 94);
+
+    // 1:36 (96s) onward - No overlays
+
+    // Register timeline
+    // Wait for GSAP to finish recording all the fromTo tweens into its internal timeline duration
+    // It might be reporting 0 if inspected immediately before the tick happens, or without totalDuration() properly bound.
+    tl.duration(96);
+    tl.totalDuration = function() { return 96; };
+
+    window.__timelines["my-video"] = tl;
+  </script>
+</body>
+</html>
