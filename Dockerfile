@@ -18,13 +18,16 @@ ENV PATH="/root/.bun/bin:${PATH}"
 
 WORKDIR /app
 
-# Copy all repository files into the working directory
+# Copy all repository files into the container
 COPY . .
 
-# Run bun install to properly resolve the workspace modules
+# 1. Install the core engine workspace modules
 RUN bun install
+
+# 2. Explicitly inject express at the root level so server.cjs can use it
+RUN bun add express
 
 EXPOSE 3000
 
-# Start the Express server bridge
+# Start the Express server bridge using the correct .cjs extension
 CMD ["node", "server.cjs"]
