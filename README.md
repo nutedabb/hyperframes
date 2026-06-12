@@ -1,3 +1,13 @@
+YAML
+---
+title: HyperFrames API Bridge
+emoji: 🚀
+colorFrom: cyan
+colorTo: blue
+sdk: docker
+app_port: 7860
+---
+
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/logo/dark.svg">
@@ -39,9 +49,6 @@ Install the HyperFrames skills, then describe the video you want:
 
 ```bash
 npx skills add heygen-com/hyperframes
-```
-
-Try a prompt like:
 
 > Using `/hyperframes`, create a 10-second product intro with a fade-in title, a background video, and subtle background music.
 
