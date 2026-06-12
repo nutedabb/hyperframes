@@ -5,7 +5,10 @@ const path = require('path');
 const crypto = require('crypto');
 
 const app = express();
+
+// Support both raw JSON and URL-encoded form data payloads from n8n workflows
 app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 const BASE_DIR = '/tmp/hyperframes-jobs';
 if (!fs.existsSync(BASE_DIR)) fs.mkdirSync(BASE_DIR, { recursive: true });
@@ -16,7 +19,8 @@ app.post('/render', (req, res) => {
     const projectDir = path.join(BASE_DIR, jobId);
     fs.mkdirSync(projectDir, { recursive: true });
 
-    const htmlContent = req.body.html || "<html><body><h1>No Overlay Content</h1></body></html>";
+    // Use optional chaining (?.) to prevent crashes if the body is empty
+    const htmlContent = req.body?.html || "<html><body><h1>No Overlay Content</h1></body></html>";
     fs.writeFileSync(path.join(projectDir, 'index.html'), htmlContent);
 
     // Run the native rendering CLI against the incoming HTML file
@@ -48,7 +52,6 @@ app.get('/status/:jobId', (req, res) => {
     }
 
     if (fs.existsSync(videoFile)) {
-        // Instead of sending the raw file here, return a download URL link
         return res.json({ 
             status: "completed", 
             download_url: `https://${req.get('host')}/download/${req.params.jobId}` 
