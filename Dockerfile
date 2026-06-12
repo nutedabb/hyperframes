@@ -14,14 +14,13 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Install dependencies inside the container environment
-COPY package*.json ./
-RUN npm install
-
-# Copy all engine code from your fork
+# 1. Copy ALL files first so npm can find the internal workspace folders
 COPY . .
+
+# 2. Run npm install against the complete monorepo layout
+RUN npm install
 
 EXPOSE 3000
 
-# Tell Render to run the web API bridge instead of standard CLI execution
+# Tell Render to run the web API bridge
 CMD ["node", "server.js"]
