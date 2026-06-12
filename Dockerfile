@@ -27,4 +27,4 @@ RUN bun install
 EXPOSE 3000
 
 # Start the Express server bridge
-CMD ["node", "server.js"]
+CMD ["node", "server.cjs"]
