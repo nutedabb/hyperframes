@@ -27,7 +27,7 @@ RUN bun install
 # 2. Explicitly inject express at the root level so server.cjs can use it
 RUN bun add express
 
-EXPOSE 3000
+EXPOSE 7860
 
 # Start the Express server bridge using the correct .cjs extension
 CMD ["node", "server.cjs"]
