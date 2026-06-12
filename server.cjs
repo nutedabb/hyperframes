@@ -40,6 +40,10 @@ app.post('/render', (req, res) => {
         status_url: `https://${req.get('host')}/status/${jobId}`
     });
 });
+// Health check route for cron-job.org uptime pings
+app.get('/', (req, res) => {
+    res.status(200).send("HyperFrames Engine Online");
+});
 
 // 2. Updated Status Endpoint (ALWAYS returns JSON)
 app.get('/status/:jobId', (req, res) => {
