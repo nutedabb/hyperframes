@@ -9,6 +9,7 @@ const app = express();
 // Support both raw JSON and URL-encoded form data payloads from n8n workflows
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use((req, res, next) => { console.log('BODY RECEIVED:', req.body); next(); });
 
 const BASE_DIR = '/tmp/hyperframes-jobs';
 if (!fs.existsSync(BASE_DIR)) fs.mkdirSync(BASE_DIR, { recursive: true });
